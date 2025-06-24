@@ -1,7 +1,7 @@
 import fastify from "fastify"
+import { userRoutes } from "./routes/userRoutes"
 
 export const app = fastify()
 
-app.get('/', async () => {
-    return 'Funcionando'
-})
+//Registrando as rotas da aplicação
+app.register(userRoutes)

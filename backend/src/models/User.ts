@@ -1,4 +1,4 @@
-const randomUUID = '01'
+import { randomUUID } from 'crypto';
 
 export class User {
     private id: string
@@ -9,8 +9,8 @@ export class User {
     private password: string
     
 
-    constructor(name, age, cpf, email, password) {
-        this.id = randomUUID
+    constructor(name: string, age: number, cpf: number, email: string, password: string) {
+        this.id = randomUUID()
         this.name = name
         this.age = age
         this.cpf = cpf

@@ -5,18 +5,31 @@ import {z} from 'zod'
 const criarUsuario = async (request: FastifyRequest, reply: FastifyReply) => {
     const bodySchema = z.object({
             name: z.string(),
-            email: z.string()
+            age: z.number(),
+            cpf: z.number(),
+            email: z.string(),
+            password: z.string()
         })
 
-    const { name, email } = bodySchema.parse(request.body)
+    const { name, age, cpf, email, password } = bodySchema.parse(request.body)
     try {
-        const newUser = userService.criarUsuario(name, email)
+        const newUser = userService.criarUsuario(name, age, cpf, email, password)
         reply.status(201).send('Usuário criado')
     } catch (err) {
-        reply.status(400).send({err: err.message})
+        reply.status(400).send({erro: err.message})
+    }
+}
+
+const listarUsuarios = async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+        const users = await userService.listarUsuarios()
+        reply.status(200).send(users)
+    } catch (err) {
+        reply.status(400).send({ erro: err.message })
     }
 }
 
 export const userController = {
-    criarUsuario
+    criarUsuario,
+    listarUsuarios
 }

@@ -2,8 +2,8 @@ import { randomUUID } from 'crypto';
 
 export class User {
     private id: string
-    public name: string
-    public age: number
+    private name: string
+    private age: number
     private cpf: number
     private email: string
     private password: string
@@ -19,37 +19,58 @@ export class User {
     }
 
     //Getters
-    public get getId(): string {
+    get getId(): string {
         return this.id
     }
 
-    public get getName(): string {
+    get getName(): string {
         return this.name
     }
 
-    public get getEmail(): string {
+    get getEmail(): string {
         return this.email;
     }
 
-    public get getPassword(): string {
-        return this.password;
-    }
-
     //Setters
-    public set setName(newName: string) {
+    set setName(newName: string) {
         this.name = newName
     }
 
-    public set setEmail(newEmail: string) {
+    set setEmail(newEmail: string) {
         this.email = newEmail
     }
 
-    public set setPassword(newPass: string) {
+    set setPassword(newPass: string) {
         this.password = newPass
     }
 
     //Methods
-    public openAccount(): void {
+    openAccount(): void {
         
+    }
+
+    validateInfos(db: any): any {
+        const errors: string[] = []
+
+        if (this.age < 18) {
+            errors.push('O usuário deve ser maior de idade')
+        }
+        if (String(this.cpf).length !== 11) {
+            errors.push('CPF deve ter 11 dígitos')
+        }
+        if (this.password.length !== 6) {
+            errors.push('A senha deve conter 6 dígitos')
+        }
+        if (db.find((user: any) => user.email === this.email)) {
+            errors.push('Este email já está cadastrado')
+        }
+        if (db.find((user: any) => user.cpf === this.cpf)) {
+            errors.push('Este CPF já está cadastrado')
+        }
+
+        if (errors.length > 0) {
+            return { status: false, messages: errors }
+        }
+        return { status: true }
     }
 }

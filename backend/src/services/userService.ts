@@ -10,10 +10,13 @@ const criarUsuario = async (
     password: string ) => {
         
         const usuario = new User(name, age, cpf, email, password)
-
-        fakeDB.push(usuario)
-
-        return usuario
+        const validation = usuario.validateInfos(fakeDB)
+        
+        if (validation.status) {
+            fakeDB.push(usuario)
+        } else {
+            throw new Error(`${validation.messages}`)
+        }
 }
 
 const listarUsuarios = async () => {

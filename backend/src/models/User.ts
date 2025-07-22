@@ -1,5 +1,15 @@
 import { randomUUID } from 'crypto';
 
+export interface UserData {
+    data: {
+      name: string
+        age: number
+        cpf: number
+        email: string
+        password: string  
+    }
+}
+
 export class User {
     private id: string
     private name: string
@@ -32,10 +42,6 @@ export class User {
     }
 
     //Setters
-    set setName(newName: string) {
-        this.name = newName
-    }
-
     set setEmail(newEmail: string) {
         this.email = newEmail
     }

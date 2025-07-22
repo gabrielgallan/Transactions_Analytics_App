@@ -1,13 +1,10 @@
 import { User } from "../models/User"
+import { UserData } from "../models/User"
 
 export const fakeDB: User[] = []
 
-const criarUsuario = async (
-    name: string,
-    age: number,
-    cpf:number, 
-    email: string,
-    password: string ) => {
+const criarUsuario = async ( userdata: UserData ) => {
+        const { name, age, cpf, email, password } = userdata.data
         
         const usuario = new User(name, age, cpf, email, password)
         const validation = usuario.validateInfos(fakeDB)
@@ -20,9 +17,8 @@ const criarUsuario = async (
 }
 
 const listarUsuarios = async () => {
-    const usuarios: User[] = fakeDB
-
-    return usuarios
+        const usuarios: User[] = fakeDB
+        return usuarios
 }
 
 export const userService = {

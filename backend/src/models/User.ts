@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'crypto'
 
 export interface UserData {
     data: {
@@ -37,10 +37,6 @@ export class User {
         return this.name
     }
 
-    get getEmail(): string {
-        return this.email;
-    }
-
     //Setters
     set setEmail(newEmail: string) {
         this.email = newEmail
@@ -51,31 +47,33 @@ export class User {
     }
 
     //Methods
-    openAccount(): void {
-        
-    }
-
     validateInfos(db: any): any {
         const errors: string[] = []
+        let code = null
 
         if (this.age < 18) {
             errors.push('O usuário deve ser maior de idade')
+            code = 400
         }
         if (String(this.cpf).length !== 11) {
             errors.push('CPF deve ter 11 dígitos')
+            code = 400
         }
         if (this.password.length !== 6) {
             errors.push('A senha deve conter 6 dígitos')
+            code = 400
         }
         if (db.find((user: any) => user.email === this.email)) {
             errors.push('Este email já está cadastrado')
+            code = 409
         }
         if (db.find((user: any) => user.cpf === this.cpf)) {
             errors.push('Este CPF já está cadastrado')
+            code = 409
         }
 
         if (errors.length > 0) {
-            return { status: false, messages: errors }
+            return { status: false, messages: errors, code }
         }
         return { status: true }
     }

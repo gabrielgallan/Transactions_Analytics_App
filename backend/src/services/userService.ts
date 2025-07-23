@@ -1,24 +1,31 @@
 import { User } from "../models/User"
 import { UserData } from "../models/User"
+import { Account } from "../models/Accounts"
 
 export const fakeDB: User[] = []
 
 const criarUsuario = async ( userdata: UserData ) => {
         const { name, age, cpf, email, password } = userdata.data
         
-        const usuario = new User(name, age, cpf, email, password)
-        const validation = usuario.validateInfos(fakeDB)
+        const user = new User(name, age, cpf, email, password)
+        const validation = user.validateInfos(fakeDB)
         
         if (validation.status) {
-            fakeDB.push(usuario)
+            const user_account = new Account(user.getId, user.getName)
+            fakeDB.push(user)
         } else {
-            throw new Error(`${validation.messages}`)
+            throw { message: validation.messages, code: validation.code }
         }
 }
 
 const listarUsuarios = async () => {
-        const usuarios: User[] = fakeDB
+    const usuarios: User[] = fakeDB
+
+    if ( usuarios ) {
         return usuarios
+    } else {
+        throw ({ message: 'Não foi possível encontrar usuários' })
+    }
 }
 
 export const userService = {

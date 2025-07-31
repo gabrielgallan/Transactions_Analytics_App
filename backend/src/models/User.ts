@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto'
 
 export interface UserData {
     data: {
-      name: string
+        name: string
         age: number
         cpf: number
         email: string

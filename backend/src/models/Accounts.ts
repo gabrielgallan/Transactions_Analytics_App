@@ -14,4 +14,11 @@ export class Account {
         this.balance = 0
         this.type = 'Corrente'
     }
+
+    //Getters
+
+    //Setters
+
+    //Methods
+    
 }

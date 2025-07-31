@@ -1,0 +1,8 @@
+import fastify, { FastifyInstance } from "fastify"
+import { accountController } from '../controllers/accountController'
+
+const app = fastify()
+
+export async function accountRoutes(app:FastifyInstance) {
+    app.get('/accounts', accountController.listarContas)
+}

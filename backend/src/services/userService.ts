@@ -1,6 +1,7 @@
 import { User } from "../models/User"
 import { UserData } from "../models/User"
 import { Account } from "../models/Accounts"
+import { accounts_db } from "./accountService"
 
 export const fakeDB: User[] = []
 
@@ -13,6 +14,7 @@ const criarUsuario = async ( userdata: UserData ) => {
         if (validation.status) {
             const user_account = new Account(user.getId, user.getName)
             fakeDB.push(user)
+            accounts_db.push(user_account)
         } else {
             throw { message: validation.messages, code: validation.code }
         }

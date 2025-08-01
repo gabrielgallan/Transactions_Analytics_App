@@ -1,9 +1,8 @@
 import { Account } from "../models/Accounts"
-
-export const accounts_db: Account[] = []
+import { database } from "../app"
 
 const listarContas = async () => {
-    const accounts: Account[] = accounts_db
+    const accounts: Account[] = database.select('accounts')
 
     if ( accounts ) {
         return accounts

@@ -1,27 +1,25 @@
-import { User } from "../models/User"
-import { UserData } from "../models/User"
-import { Account } from "../models/Accounts"
-import { accounts_db } from "./accountService"
-
-export const fakeDB: User[] = []
+import { UserData, User } from "../models/User.ts"
+import { Account } from "../models/Accounts.ts"
+import { database } from "../app.ts"
 
 const criarUsuario = async ( userdata: UserData ) => {
         const { name, age, cpf, email, password } = userdata.data
         
         const user = new User(name, age, cpf, email, password)
-        const validation = user.validateInfos(fakeDB)
+        const validation = user.validateInfos(database.select('users'))
         
         if (validation.status) {
             const user_account = new Account(user.getId, user.getName)
-            fakeDB.push(user)
-            accounts_db.push(user_account)
+            database.insert('users', user)
+            database.insert('accounts', user_account)
+
         } else {
             throw { message: validation.messages, code: validation.code }
         }
 }
 
 const listarUsuarios = async () => {
-    const usuarios: User[] = fakeDB
+    const usuarios: User[] = database.select('users')
 
     if ( usuarios ) {
         return usuarios

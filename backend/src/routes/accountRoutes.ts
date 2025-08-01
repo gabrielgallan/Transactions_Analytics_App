@@ -1,5 +1,5 @@
 import fastify, { FastifyInstance } from "fastify"
-import { accountController } from '../controllers/accountController'
+import { accountController } from '../controllers/accountController.ts'
 
 const app = fastify()
 

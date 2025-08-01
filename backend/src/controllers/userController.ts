@@ -1,7 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify'
-import { userService } from '../services/userService'
-import { UserData } from '../models/User'
-import { z } from 'zod'
+import { userService } from '../services/userService.ts'
+import { UserData } from '../models/User.ts'
 
 const criarUsuario = async (request: FastifyRequest, reply: FastifyReply) => {
     const userdata = request.body as UserData

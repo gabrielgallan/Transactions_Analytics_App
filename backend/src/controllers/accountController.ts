@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify'
-import { accountService } from '../services/accountService'
+import { accountService } from '../services/accountService.ts'
 
 
 const listarContas = async (request: FastifyRequest, reply: FastifyReply) => {

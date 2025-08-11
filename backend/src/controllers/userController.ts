@@ -8,7 +8,7 @@ async function criarUsuario (request: FastifyRequest, reply: FastifyReply) {
 
         try {
             const newUser = await userService.criarUsuario(userdata)
-            reply.status(201).send({ status: true, message: `Usuário criado` })
+            reply.status(201).send({ status: true, message: `Usuário criado`, data: newUser })
 
         } catch (err: any) {
             reply.status(err.code || 500).send({ status: false, message: err.message || 'Erro desconhecido' })
@@ -47,9 +47,21 @@ async function buscarContaDoUsuario(request: FastifyRequest, reply: FastifyReply
     }
 }
 
+async function deletarUsuarioPeloId(request: FastifyRequest, reply: FastifyReply) {
+    try {
+        const userUUID: string = validUUIDParam( request.params )
+        const delete_service = await userService.deletarUsuarioPeloId( userUUID )
+        reply.status(200).send({ status: true, message: 'Usuário deletado', data: delete_service })
+
+    } catch (err: any) {
+        reply.status(err.code || 500).send({ status: false, message: err.message || 'Erro desconhecido' })
+    }
+}
+
 export const userController = {
     criarUsuario,
     listarUsuarios,
     buscarUsuarioPeloId,
-    buscarContaDoUsuario
+    buscarContaDoUsuario,
+    deletarUsuarioPeloId
 }

@@ -1,6 +1,7 @@
 import { UserData, User } from "../models/User.ts"
 import { Account } from "../models/Accounts.ts"
 import { database } from "../app.ts"
+import { HttpError } from "../models/HttpErrors.ts"
 
 async function criarUsuario( userdata: UserData ) {
         const { name, age, cpf, email, password } = userdata.data
@@ -13,6 +14,7 @@ async function criarUsuario( userdata: UserData ) {
             database.insert('users', user)
             database.insert('accounts', user_account)
 
+            return user 
         } else {
             throw { message: validation.messages, code: validation.code }
         }
@@ -46,9 +48,24 @@ async function buscarContaDoUsuario( uuid: string ) {
     }
 }
 
+async function deletarUsuarioPeloId( uuid: string ) {
+    try {
+        return await database.delete('users', 'id', uuid)
+    } catch (err: any) {
+        if (err instanceof HttpError) {
+            throw err
+        } else {
+            throw new Error('Erro desconhecido')
+        }
+    }
+    
+    
+}
+
 export const userService = {
     criarUsuario,
     listarUsuarios,
     buscarUsuarioPeloId,
-    buscarContaDoUsuario
+    buscarContaDoUsuario,
+    deletarUsuarioPeloId
 }

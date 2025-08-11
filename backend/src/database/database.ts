@@ -33,4 +33,9 @@ export class Database {
         this.persist()
         return data
     }
+
+    public select_where(table: string, paramType: string, paramData: any) {
+        return this.select(table)
+                   .find((data: Record<string, any>) => data[paramType] === paramData)
+    }
 }

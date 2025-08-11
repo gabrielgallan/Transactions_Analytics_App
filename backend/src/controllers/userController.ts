@@ -1,8 +1,9 @@
 import { FastifyRequest, FastifyReply } from 'fastify'
 import { userService } from '../services/userService.ts'
 import { UserData } from '../models/User.ts'
+import { validUUIDParam } from '../middlewares/valid_uuid_param.ts'
 
-const criarUsuario = async (request: FastifyRequest, reply: FastifyReply) => {
+async function criarUsuario (request: FastifyRequest, reply: FastifyReply) {
     const userdata = request.body as UserData
 
         try {
@@ -10,21 +11,45 @@ const criarUsuario = async (request: FastifyRequest, reply: FastifyReply) => {
             reply.status(201).send({ status: true, message: `Usuário criado` })
 
         } catch (err: any) {
-            reply.status(err.code).send({ status: false, message: err.message })
+            reply.status(err.code || 500).send({ status: false, message: err.message || 'Erro desconhecido' })
         }
 }
 
-const listarUsuarios = async (request: FastifyRequest, reply: FastifyReply) => {
+async function listarUsuarios(request: FastifyRequest, reply: FastifyReply) {
         try {
             const users = await userService.listarUsuarios()
             reply.status(200).send({ status: true, data: {users} })
 
         } catch (err: any) {
-            reply.status(400).send({ status: false, message: err.message })
+            reply.status(400).send({ status: false, message: err.message || 'Erro desconhecido' })
         }
+}
+
+async function buscarUsuarioPeloId(request: FastifyRequest, reply: FastifyReply) {
+    try {
+        const userUUID: string = validUUIDParam( request.params )
+        const user = await userService.buscarUsuarioPeloId( userUUID )
+        reply.status(200).send({ status: true, data: { user } })
+
+    } catch (err: any) {
+        reply.status(err.code || 500).send({ status: false, message: err.message || 'Erro desconhecido' })
+    }
+}
+
+async function buscarContaDoUsuario(request: FastifyRequest, reply: FastifyReply) {
+    try {
+        const userUUID: string = validUUIDParam( request.params )
+        const account = await userService.buscarContaDoUsuario( userUUID )
+        reply.status(200).send({ status: true, data: { account } })
+
+    } catch (err: any) {
+        reply.status(err.code || 500).send({ status: false, message: err.message || 'Erro desconhecido' })
+    }
 }
 
 export const userController = {
     criarUsuario,
-    listarUsuarios
+    listarUsuarios,
+    buscarUsuarioPeloId,
+    buscarContaDoUsuario
 }

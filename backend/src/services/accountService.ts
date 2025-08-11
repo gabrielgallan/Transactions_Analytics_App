@@ -1,7 +1,7 @@
-import { Account } from "../models/Accounts"
-import { database } from "../app"
+import { Account } from "../models/Accounts.ts"
+import { database } from "../app.ts"
 
-const listarContas = async () => {
+async function listarContas() {
     const accounts: Account[] = database.select('accounts')
 
     if ( accounts ) {
@@ -11,6 +11,16 @@ const listarContas = async () => {
     }
 }
 
+async function buscarContaPeloId( uuid: string ) {
+    const account: Account = database.select_where('accounts', 'id', uuid)
+    if ( account ) {
+        return account
+    } else {
+        throw { code: 404, message: 'Account not found' }
+    }
+}
+
 export const accountService = {
-    listarContas
+    listarContas,
+    buscarContaPeloId
 }

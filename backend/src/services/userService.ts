@@ -2,6 +2,7 @@ import { UserData, User } from "../models/User.ts"
 import { Account } from "../models/Accounts.ts"
 import { database } from "../app.ts"
 import { HttpError } from "../models/HttpErrors.ts"
+import { PutUserHandler } from "../utils/User.ts"
 
 async function criarUsuario( userdata: UserData ) {
         const { name, age, cpf, email, password } = userdata.data
@@ -62,10 +63,22 @@ async function deletarUsuarioPeloId( uuid: string ) {
     
 }
 
+async function atualizarUsuario( uuid: string, body: any ) {
+    try {
+        const user: User = await buscarUsuarioPeloId( uuid )
+        const SetRequest = PutUserHandler( body.type, body.data, user )
+
+        return await database.update('users', uuid, user)
+    } catch (err: any) {
+        throw { message: err.message, code: err.code || 500 }
+    }
+}
+
 export const userService = {
     criarUsuario,
     listarUsuarios,
     buscarUsuarioPeloId,
     buscarContaDoUsuario,
-    deletarUsuarioPeloId
+    deletarUsuarioPeloId,
+    atualizarUsuario
 }

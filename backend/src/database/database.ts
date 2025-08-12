@@ -61,4 +61,22 @@ export class Database {
         await this.persist()
         return dataToDelete
     }
+
+    public async update(table: string, id: string, newData: object) {
+        if (!this.database[table]) {
+            throw new HttpError(404, 'Tabela não encontrada');
+        }
+    
+        const index = this.database[table].findIndex((data: Record<string, any>) => data.id === id);
+    
+        if (index === -1) {
+            throw new HttpError(404, 'Recurso não encontrado');
+        }
+    
+        // Substitui o elemento pelo novo dado
+        this.database[table][index] = { ...this.database[table][index], ...newData };
+    
+        await this.persist();
+        return this.database[table][index];
+    }
 }

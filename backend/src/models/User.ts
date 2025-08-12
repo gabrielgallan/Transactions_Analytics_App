@@ -1,4 +1,5 @@
 import { randomUUID } from 'crypto'
+import { string } from 'zod/v4'
 
 export interface UserData {
     data: {
@@ -47,7 +48,7 @@ export class User {
     }
 
     //Methods
-    validateInfos(db: any): any {
+    validateInfos(db: User[]): any {
         const errors: string[] = []
         let code = null
 
@@ -76,5 +77,39 @@ export class User {
             return { status: false, messages: errors, code }
         }
         return { status: true }
+    }
+
+    TrySetEmail(db: User[], UserToSet: User, newEmail: string): any {
+        try {
+            const checkEmail = db.find((user) => user.email === newEmail )
+
+            if ( checkEmail ) {
+                return { status: false, message: 'Já existe um usuário com este email' }
+            }
+
+            UserToSet.setEmail = newEmail
+            return { status: true }
+        } catch (err) {
+            return { status: false, message: 'Erro ao atualizar usuário' }
+        }
+    }
+
+    TrySetPassword(UserToSet: User, newPass: string): any {
+        try {
+            const oldPass = UserToSet.password
+
+            if ( oldPass === newPass ) {
+                throw new Error('A senha informada é a mesma da atual')
+            } else if ( newPass.length !== 6 ) {
+                throw new Error('A nova senha deve conter 6 digitos')
+            }
+
+            UserToSet.setPassword = newPass
+            return { status: true }
+        } catch (err: any) {
+            return { status: false, message: err.message || 'Erro ao atualizar usuário' }
+        }
+
+
     }
 }

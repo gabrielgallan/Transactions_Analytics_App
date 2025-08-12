@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify'
 import { userService } from '../services/userService.ts'
 import { UserData } from '../models/User.ts'
-import { validUUIDParam } from '../middlewares/valid_uuid_param.ts'
+import { validDataToSet, validUUIDParam } from '../middlewares/valid_uuid_param.ts'
 
 async function criarUsuario (request: FastifyRequest, reply: FastifyReply) {
     const userdata = request.body as UserData
@@ -58,10 +58,23 @@ async function deletarUsuarioPeloId(request: FastifyRequest, reply: FastifyReply
     }
 }
 
+async function atualizarUsuario(request: FastifyRequest, reply: FastifyReply) {
+    try {
+        const user_uuid: string = validUUIDParam( request.params )
+        const body = validDataToSet( request.body )
+        const put_service = await userService.atualizarUsuario(user_uuid, body)
+
+        reply.status(200).send({ status: true, message: 'Usuário atualizado', data: put_service })
+    } catch (err: any) {
+        reply.status(err.code).send({ status: false, message: err.message })
+    }
+}
+
 export const userController = {
     criarUsuario,
     listarUsuarios,
     buscarUsuarioPeloId,
     buscarContaDoUsuario,
-    deletarUsuarioPeloId
+    deletarUsuarioPeloId,
+    atualizarUsuario
 }

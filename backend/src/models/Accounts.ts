@@ -1,4 +1,6 @@
 import { randomUUID } from 'crypto';
+import { User } from './User.ts';
+import { Transaction } from './Transaction.ts';
 
 export class Account {
     private id: string
@@ -6,19 +8,34 @@ export class Account {
     private holder: string
     private balance: number
     private type: string
+    private transaction_password: string
 
-    constructor(user_id: string, holder: string) {
+    constructor( user: User ) {
         this.id = randomUUID()
-        this.user_id = user_id
-        this.holder = holder
+        this.user_id = user.getId
+        this.holder = user.getName
         this.balance = 0
         this.type = 'Corrente'
+        this.transaction_password = user.ReturnUserPassword()
     }
 
     //Getters
+    get getBalance(): number {
+        return this.balance
+    }
 
     //Setters
 
     //Methods
-    
+    deposit(transaction: Transaction): void {
+        this.balance += transaction.getAmount
+    }
+
+    withdraw(transaction: Transaction): void {
+        if ( transaction.getAmount <= this.balance ) {
+            this.balance -= transaction.getAmount
+        } else {
+            throw new Error('Não há saldo suficiente para esta transação')
+        }
+    }
 }

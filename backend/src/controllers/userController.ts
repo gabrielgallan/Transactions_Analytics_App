@@ -54,7 +54,7 @@ async function deletarUsuarioPeloId(request: FastifyRequest, reply: FastifyReply
         reply.status(200).send({ status: true, message: 'Usuário deletado', data: delete_service })
 
     } catch (err: any) {
-        reply.status(err.code || 500).send({ status: false, message: err.message || 'Erro desconhecido' })
+        reply.status(err.code || 500).send({ status: false, message: 'Erro ao deletar usuário: ' + err.message })
     }
 }
 
@@ -66,7 +66,7 @@ async function atualizarUsuario(request: FastifyRequest, reply: FastifyReply) {
 
         reply.status(200).send({ status: true, message: 'Usuário atualizado', data: put_service })
     } catch (err: any) {
-        reply.status(err.code).send({ status: false, message: err.message })
+        reply.status(err.code).send({ status: false, message: 'Erro ao atualizar usuário: ' + err.message })
     }
 }
 

@@ -11,7 +11,7 @@ async function criarUsuario( userdata: UserData ) {
         const validation = user.validateInfos(database.select('users'))
         
         if (validation.status) {
-            const user_account = new Account(user.getId, user.getName)
+            const user_account = new Account(user)
             database.insert('users', user)
             database.insert('accounts', user_account)
 

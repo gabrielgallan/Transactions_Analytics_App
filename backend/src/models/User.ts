@@ -1,5 +1,4 @@
 import { randomUUID } from 'crypto'
-import { string } from 'zod/v4'
 
 export interface UserData {
     data: {
@@ -88,9 +87,9 @@ export class User {
             }
 
             UserToSet.setEmail = newEmail
-            return { status: true }
-        } catch (err) {
-            return { status: false, message: 'Erro ao atualizar usuário' }
+            return
+        } catch (err: any) {
+            throw new Error('Erro ao atualizar email: ' + err.message)
         }
     }
 
@@ -105,11 +104,15 @@ export class User {
             }
 
             UserToSet.setPassword = newPass
-            return { status: true }
+            return
         } catch (err: any) {
-            return { status: false, message: err.message || 'Erro ao atualizar usuário' }
+            throw new Error('Erro ao atualizar senha:' + err.message)
         }
 
 
+    }
+
+    ReturnUserPassword() {
+        return this.password
     }
 }

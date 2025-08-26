@@ -1,6 +1,7 @@
 import { z } from "zod"
+import { HttpError } from "../models/HttpErrors.ts"
 
-export function validUUIDParam(param: unknown) {
+export function uuid_schema(param: unknown) {
     const uuidSchema = z.object({
         id: z.string().uuid()
     })
@@ -10,7 +11,7 @@ export function validUUIDParam(param: unknown) {
     if ( uuid.success ) 
         return uuid.data.id
     else 
-        throw { code: 400, message: 'O parâmetro ID deve ser um UUID válido.' }
+        throw new HttpError(400, 'O parâmetro ID deve ser um UUID válido.')
 }
 
 export function validDataToSet(req_body: unknown) {

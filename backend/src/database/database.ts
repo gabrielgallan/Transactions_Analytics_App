@@ -36,27 +36,17 @@ export class Database {
         return data
     }
 
-    /*public async delete(table: string, paramType: string, paramData: any) {
+    public async delete(table: string, data: any) {
         if (!this.database[table]) {
             throw new HttpError(404, 'Banco de dados não encontrado')
-        } 
-        
-        const dataToDelete = this.select_where(table, paramType, paramData)
-        
-        if (!dataToDelete) {
-            throw new HttpError(404, 'Usuário não encontrado')
         }
 
         this.database[table] = this.database[table].filter(
-            (data: Record<string, any>) => data[paramType] !== paramData)
-
-        if ( this.select_where(table, paramType, paramData) ) {
-            throw new HttpError(500, 'Erro ao deletar recurso')
-        }
+            (d: any) => d !== data)
 
         await this.persist()
-        return dataToDelete
-    }*/
+        return data
+    }
 
     public async update(table: string, id: string, newData: object) {
         if (!this.database[table]) {

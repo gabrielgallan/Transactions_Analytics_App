@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify'
 import { accountService } from '../services/accountService.ts'
-import { validUUIDParam } from '../middlewares/valid_uuid_param.ts'
+import { uuid_schema } from '../middlewares/request_handler.ts'
 
 
 async function listarContas (request: FastifyRequest, reply: FastifyReply) {
@@ -14,7 +14,7 @@ async function listarContas (request: FastifyRequest, reply: FastifyReply) {
 
 async function buscarContaPeloId(request: FastifyRequest, reply: FastifyReply) {
     try {
-        const accountUUID = validUUIDParam(request.params)
+        const accountUUID = uuid_schema(request.params)
         const account = await accountService.buscarContaPeloId(accountUUID)
         reply.status(200).send({ status: true, data: { account } })
 

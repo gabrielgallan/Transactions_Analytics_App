@@ -20,29 +20,35 @@ async function listUsers() {
     const users: User[] = database.select('users').data
     return users
 }
-/*
-async function buscarUsuarioPeloId(uuid: string) {
-    const user: User = database.select_where('users', 'id', uuid)
-    if (user) {
+
+async function selectUserById(uuid: string) {
+    const user: User = database.select('users').where('id', uuid).data
+
+    if (user) 
         return user
-    } else {
-        throw { code: 404, message: 'User not found' }
-    }
+    else 
+        throw new HttpError(404, 'Usuário não encontrado')
+    
 }
 
-//Refazer
-async function deletarUsuarioPeloId(uuid: string) {
+//Ajustar
+async function deleteUserById(uuid: string) {
     try {
-        return await database.delete('users', 'id', uuid)
-    } catch (err: any) {
-        if (err instanceof HttpError) {
-            throw err
+        const user = await selectUserById(uuid)
+        const service = database.delete('users', user)
+
+        if (database.select('users').where('id', uuid).data) {
+            throw new HttpError(404, 'Erro ao deletar usuário')
         } else {
-            throw new Error('Erro desconhecido')
+            return service
         }
+
+    } catch (err: any) {
+        throw err
     }
 }
 
+/*
 //Refazer
 async function atualizarUsuario(uuid: string, body: any) {
     try {
@@ -57,5 +63,7 @@ async function atualizarUsuario(uuid: string, body: any) {
 
 export const userService = {
     createUser,
-    listUsers
+    listUsers,
+    selectUserById,
+    deleteUserById
 }

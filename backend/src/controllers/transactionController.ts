@@ -1,11 +1,11 @@
 import { FastifyRequest, FastifyReply } from 'fastify'
-import { validUUIDParam } from '../middlewares/valid_uuid_param.ts'
+import { uuid_schema } from '../middlewares/request_handler.ts'
 import { transactionService } from '../services/transactionsService.ts'
 import { TransactionBody } from '../middlewares/valid_transaction.ts'
 
 async function criarTransacao (request: FastifyRequest, reply: FastifyReply) {
     try {
-        const account_uuid = validUUIDParam( request.params )
+        const account_uuid = uuid_schema( request.params )
         const body = TransactionBody( request.body )
         const transaction = await transactionService.criarTransacao( account_uuid, body )
 
@@ -17,7 +17,7 @@ async function criarTransacao (request: FastifyRequest, reply: FastifyReply) {
 
 async function listarTransacoesDaConta (request: FastifyRequest, reply: FastifyReply) {
     try {
-        const account_uuid = validUUIDParam( request.params )
+        const account_uuid = uuid_schema( request.params )
         const transactions = await transactionService.listarTransacoesDaConta( account_uuid )
 
         reply.status(200).send({ status: true, transactions })

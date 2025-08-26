@@ -4,15 +4,7 @@ import { userController } from '../controllers/userController.ts'
 const app = fastify()
 
 export async function userRoutes(app:FastifyInstance) {
-    app.post('/users', userController.criarUsuario)
+    app.post('/users', userController.createUser)
 
-    app.get('/users', userController.listarUsuarios)
-
-    app.get('/users/:id', userController.buscarUsuarioPeloId)
-
-    app.get('/users/:id/account', userController.buscarContaDoUsuario)
-
-    app.delete('/users/:id', userController.deletarUsuarioPeloId)
-
-    app.put('/users/:id', userController.atualizarUsuario)
+    app.get('/users', userController.listUsers)
 }

@@ -9,7 +9,7 @@ export async function accountRoutes(app:FastifyInstance) {
 
     app.get('/accounts/:id', accountController.buscarContaPeloId)
 
-    app.get('/accounts/:id/transactions', transactionsController.listarTransacoes)
-
     app.post('/accounts/:id/transactions', transactionsController.criarTransacao)
+
+    app.get('/accounts/:id/transactions', transactionsController.listarTransacoesDaConta)
 }

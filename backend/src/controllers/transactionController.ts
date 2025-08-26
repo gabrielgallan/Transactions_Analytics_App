@@ -15,15 +15,18 @@ async function criarTransacao (request: FastifyRequest, reply: FastifyReply) {
     }
 }
 
-async function listarTransacoes (request: FastifyRequest, reply: FastifyReply) {
+async function listarTransacoesDaConta (request: FastifyRequest, reply: FastifyReply) {
     try {
-        
-    } catch(err) {
-        
+        const account_uuid = validUUIDParam( request.params )
+        const transactions = await transactionService.listarTransacoesDaConta( account_uuid )
+
+        reply.status(200).send({ status: true, transactions })
+    } catch(err: any) {
+        reply.status(404).send({ status: false, message: err.message })
     }
 }
 
 export const transactionsController = {
     criarTransacao,
-    listarTransacoes
+    listarTransacoesDaConta
 }

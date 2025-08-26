@@ -21,7 +21,8 @@ export class Database {
     }
 
     public select(table: string) {
-        return this.database[table] ?? []
+        const data = this.database[table] ?? []
+        return new Query(data)
     }
 
     public async insert(table: string, data: object) {
@@ -35,12 +36,7 @@ export class Database {
         return data
     }
 
-    public select_where(table: string, paramType: string, paramData: any) {
-        return this.select(table)
-                   .find((data: Record<string, any>) => data[paramType] === paramData)
-    }
-
-    public async delete(table: string, paramType: string, paramData: any) {
+    /*public async delete(table: string, paramType: string, paramData: any) {
         if (!this.database[table]) {
             throw new HttpError(404, 'Banco de dados não encontrado')
         } 
@@ -60,7 +56,7 @@ export class Database {
 
         await this.persist()
         return dataToDelete
-    }
+    }*/
 
     public async update(table: string, id: string, newData: object) {
         if (!this.database[table]) {
@@ -78,5 +74,28 @@ export class Database {
     
         await this.persist();
         return this.database[table][index];
+    }
+}
+
+
+class Query {
+    public data: any
+
+    constructor(data: any) {
+        this.data = data;
+    }
+
+    where(key: string, value: any){
+        return new Query(
+            this.data.filter((item: any) => item[key] === value)
+        )
+    }
+
+    all() {
+        return this.data;
+    }
+
+    first() {
+        return this.data.length > 0 ? this.data[0] : null;
     }
 }

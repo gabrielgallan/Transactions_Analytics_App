@@ -1,6 +1,7 @@
 import { Account } from "../models/Accounts.ts"
 import { database } from "../app.ts"
 
+//Ajustar
 async function listarContas() {
     const accounts: Account[] = database.select('accounts')
 
@@ -11,6 +12,7 @@ async function listarContas() {
     }
 }
 
+//Refazer
 async function buscarContaPeloId( uuid: string ) {
     const account: Account = database.select_where('accounts', 'id', uuid)
     if ( account ) {

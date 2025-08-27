@@ -22,7 +22,7 @@ async function listUsers() {
 }
 
 async function selectUserById(uuid: string) {
-    const user: User = database.select('users').where('id', uuid).data
+    const user: User = database.select('users').where('id', uuid).data[0]
 
     if (user) 
         return user
@@ -31,39 +31,34 @@ async function selectUserById(uuid: string) {
     
 }
 
-//Ajustar
 async function deleteUserById(uuid: string) {
     try {
-        const user = await selectUserById(uuid)
-        const service = database.delete('users', user)
+        const removed = await database.delete('users', uuid)
 
-        if (database.select('users').where('id', uuid).data) {
-            throw new HttpError(404, 'Erro ao deletar usuário')
-        } else {
-            return service
-        }
-
+        return { status: 'success', user: removed }
     } catch (err: any) {
         throw err
     }
 }
 
-/*
-//Refazer
-async function atualizarUsuario(uuid: string, body: any) {
+async function updateUser(uuid: string, updates: Partial<Omit<User, "name" | "age" | "cpf" | "id" >>) {
     try {
-        const user: User = await buscarUsuarioPeloId(uuid)
-        const SetRequest = PutUserHandler(body.type, body.data, user)
+        const user: User = await selectUserById( uuid )
+        const updated = {
+            ...user,
+            ...updates
+        }
 
-        return await database.update('users', uuid, user)
+        return await database.update('users', uuid, updated)
     } catch (err: any) {
-        throw { message: err.message, code: err.code || 500 }
+        throw err
     }
-}*/
+}
 
 export const userService = {
     createUser,
     listUsers,
     selectUserById,
-    deleteUserById
+    deleteUserById,
+    updateUser
 }

@@ -11,4 +11,6 @@ export async function userRoutes(app:FastifyInstance) {
     app.get('/users/:id', userController.selectUserById)
 
     app.delete('/users/:id', userController.deleteUserById)
+
+    app.put('/users/:id', userController.updateUser)
 }

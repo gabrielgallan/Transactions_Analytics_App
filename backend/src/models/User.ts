@@ -3,6 +3,7 @@ import { HttpError } from './HttpErrors.ts'
 import * as bcrypt from 'bcryptjs'
 import { z } from 'zod'
 
+//Usado nos Sevices
 export interface UserData {
         name: string
         age: number
@@ -11,6 +12,7 @@ export interface UserData {
         password: string
 }
 
+//Usado nos Controllers para validar dados da requisição
 export const UserSchema = z.object({
     name: z.string(),
     email: z.string().email('Email inválido'),
@@ -40,6 +42,10 @@ export class User {
     //Getters
     get get_password(): string {
         return this.password
+    }
+
+    get get_id(): string {
+        return this.id
     }
 
     //Setters

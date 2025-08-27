@@ -36,19 +36,24 @@ export class Database {
         return data
     }
 
-    public async delete(table: string, data: any) {
+    public async delete(table: string, id: string) {
         if (!this.database[table]) {
-            throw new HttpError(404, 'Banco de dados não encontrado')
+            throw new HttpError(404, 'Tabela não encontrada')
         }
-
-        this.database[table] = this.database[table].filter(
-            (d: any) => d !== data)
-
+    
+        const index = this.database[table].findIndex((data: Record<string, any>) => data.id === id)
+    
+        if (index === -1) {
+            throw new HttpError(404, 'Recurso não encontrado')
+        }
+    
+        const [removed] = this.database[table].splice(index, 1)
+    
         await this.persist()
-        return data
+        return removed
     }
 
-    public async update(table: string, id: string, newData: object) {
+    public async update(table: string, id: string, newData: Record<string, any>) {
         if (!this.database[table]) {
             throw new HttpError(404, 'Tabela não encontrada');
         }
@@ -60,10 +65,11 @@ export class Database {
         }
     
         // Substitui o elemento pelo novo dado
-        this.database[table][index] = { ...this.database[table][index], ...newData };
+        this.database[table][index] = newData
+        
     
-        await this.persist();
-        return this.database[table][index];
+        await this.persist()
+        return this.database[table][index]
     }
 }
 

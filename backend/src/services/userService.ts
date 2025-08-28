@@ -1,8 +1,9 @@
-import { UserData, User, UserSchema } from "../models/User.ts"
+import { UserData, User, UserSchema, UpdateData } from "../models/User.ts"
 import { Account } from "../models/Accounts.ts"
 import { database } from "../app.ts"
 import { HttpError } from "../models/HttpErrors.ts"
 import { PutUserHandler } from "../utils/User.ts"
+import { UpdateUserHandler } from "../middlewares/user_handlers.ts"
 
 async function createUser(userdata: UserData) {
     try {
@@ -41,12 +42,14 @@ async function deleteUserById(uuid: string) {
     }
 }
 
-async function updateUser(uuid: string, updates: Partial<Omit<User, "name" | "age" | "cpf" | "id" >>) {
+async function updateUser(uuid: string, update: UpdateData) {
     try {
         const user: User = await selectUserById( uuid )
+        const data = await UpdateUserHandler( update, uuid, database.select('users').data )
+
         const updated = {
             ...user,
-            ...updates
+            ...data
         }
 
         return await database.update('users', uuid, updated)

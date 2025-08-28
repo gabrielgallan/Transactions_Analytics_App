@@ -76,3 +76,13 @@ class ValidateUserService {
         return Status.success
     }
 }
+
+export interface UpdateData {
+    type: 'email' | 'password',
+    data: string
+}
+
+export const UpdateDataSchema = z.object({
+    type: z.enum(["email", "password"]),
+    data: z.string(),
+})

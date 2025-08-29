@@ -2,8 +2,9 @@ import { UserData, User, UserSchema, UpdateData } from "../models/User.ts"
 import { Account } from "../models/Accounts.ts"
 import { database } from "../app.ts"
 import { HttpError } from "../models/HttpErrors.ts"
-import { PutUserHandler } from "../utils/User.ts"
 import { UpdateUserHandler } from "../middlewares/user_handlers.ts"
+import { z } from "zod"
+import { ZodErrorHandler } from "../middlewares/zod_error_handler.ts"
 
 async function createUser(userdata: UserData) {
     try {
@@ -23,10 +24,10 @@ async function listUsers() {
 }
 
 async function selectUserById(uuid: string) {
-    const user: User = database.select('users').where('id', uuid).data[0]
+    const rawUser: User = database.select('users').where('id', uuid).data[0]
 
-    if (user) 
-        return user
+    if (rawUser) 
+        return User.import(rawUser)
     else 
         throw new HttpError(404, 'Usuário não encontrado')
     
@@ -45,7 +46,7 @@ async function deleteUserById(uuid: string) {
 async function updateUser(uuid: string, update: UpdateData) {
     try {
         const user: User = await selectUserById( uuid )
-        const data = await UpdateUserHandler( update, uuid, database.select('users').data )
+        const data = await UpdateUserHandler( update, user, database.select('users').data )
 
         const updated = {
             ...user,
@@ -54,6 +55,10 @@ async function updateUser(uuid: string, update: UpdateData) {
 
         return await database.update('users', uuid, updated)
     } catch (err: any) {
+        if (err instanceof z.ZodError) {
+            throw new HttpError(404, err.errors[0].message)
+        }
+        
         throw err
     }
 }

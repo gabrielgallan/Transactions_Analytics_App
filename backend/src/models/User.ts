@@ -40,10 +40,6 @@ export class User {
     }
 
     //Getters
-    get get_password(): string {
-        return this.password
-    }
-
     get get_id(): string {
         return this.id
     }
@@ -54,6 +50,15 @@ export class User {
     //Methods
     validate_process(db: User[]): Status {
         return new ValidateUserService().process(this, db)
+    }
+
+    compare_pass( password: string ): boolean {
+        return bcrypt.compareSync(password, this.password)
+    }
+
+    static import(json: any): User {
+        const user = Object.create(User.prototype) // cria instância sem chamar constructor
+        return Object.assign(user, json)            // copia as propriedades
     }
 }
 

@@ -4,13 +4,15 @@ import { database } from "../app.ts"
 import { HttpError } from "../models/HttpErrors.ts"
 import { UpdateUserHandler } from "../middlewares/user_handlers.ts"
 import { z } from "zod"
+import { accountService } from "./accountService.ts"
 
 async function createUser(userdata: UserData) {
     try {
         const user = new User(userdata)
         const proccess = user.validate_process(database.select('users').data)
+        await accountService.createAccount(user, userdata.password)
+        
         database.insert('users', user)
-
         return proccess
     } catch (err) {
         throw err

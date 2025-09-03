@@ -5,11 +5,11 @@ import { transactionsController } from '../controllers/transactionController.ts'
 const app = fastify()
 
 export async function accountRoutes(app:FastifyInstance) {
-    app.get('/accounts', accountController.listarContas)
+    app.get('/accounts', accountController.listAccounts)
 
-    app.get('/accounts/:id', accountController.buscarContaPeloId)
+    /*app.get('/accounts/:id', accountController.buscarContaPeloId)
 
     app.post('/accounts/:id/transactions', transactionsController.criarTransacao)
 
-    app.get('/accounts/:id/transactions', transactionsController.listarTransacoesDaConta)
+    app.get('/accounts/:id/transactions', transactionsController.listarTransacoesDaConta)*/
 }

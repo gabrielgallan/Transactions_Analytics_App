@@ -43,8 +43,13 @@ export class User {
     }
 
     //Getters
-    get get_id(): string {
-        return this.id
+    get password_hash(): string {
+        if (this.roles === UserRoles.admin) {
+            this.roles = UserRoles.none
+            return this.password
+        } else {
+            return Status.failed
+        }
     }
 
     //Setters
@@ -52,12 +57,12 @@ export class User {
     //Methods
     validate_process(db: User[]): Status {
         const result = new ValidateUserService().process(this, db)
-        this.roles = UserRoles.none
+        this.roles = UserRoles.admin
         return result
     }
 
-    public_data(): Omit<UserData, "password"> & { id: string } | null {
-        if (this.roles === UserRoles.operator || this.roles === UserRoles.admin ) {
+    public_data(): Omit<UserData, "password"> & { id: string } {
+        if (this.roles === UserRoles.operator || this.roles === UserRoles.admin) {
             this.roles = UserRoles.none
             return {
                 id: this.id,
@@ -67,10 +72,16 @@ export class User {
                 email: this.email
             }
         }
-        return null
+        return {
+            id: '',
+            name: '',
+            age: 0,
+            cpf: '',
+            email: ''
+        }
     }
 
-    authenticate( password: string ): Status {
+    authenticate(password: string): Status {
         if (bcrypt.compareSync(password, this.password)) {
             this.roles = UserRoles.admin
             return Status.success
@@ -79,12 +90,12 @@ export class User {
     }
 
     compare_pass(password: string): Status | null {
-        if (this.roles === UserRoles.operator || this.roles === UserRoles.admin ) {
+        if (this.roles === UserRoles.operator || this.roles === UserRoles.admin) {
             //this.roles = UserRoles.none
-          if (bcrypt.compareSync(password, this.password))
-            return Status.success
-          else
-            return Status.failed
+            if (bcrypt.compareSync(password, this.password))
+                return Status.success
+            else
+                return Status.failed
         }
 
         return null

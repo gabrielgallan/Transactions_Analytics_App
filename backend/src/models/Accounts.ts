@@ -3,7 +3,7 @@ import { User } from './User.ts';
 import { Transaction } from './Transaction.ts';
 
 export class Account {
-    private id: string
+    private a_id: string
     private user_id: string
     private holder: string
     private balance: number
@@ -11,11 +11,11 @@ export class Account {
     private transaction_password: string
 
     constructor( user: User ) {
-        this.id = randomUUID()
-        this.user_id = user.getId
-        this.holder = user.getName
+        this.a_id = randomUUID()
+        this.user_id = user.get_id
+        this.holder = user.name
         this.balance = 0
-        this.type = 'Corrente'
+        this.type = ''
         this.transaction_password = user.ReturnUserPassword()
     }
 

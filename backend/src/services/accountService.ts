@@ -1,5 +1,10 @@
 import { Account } from "../models/Accounts.ts"
 import { database } from "../app.ts"
+import { User } from "../models/User.ts"
+
+async function createAccount(user: User) {
+    
+}
 
 //Ajustar
 async function listarContas() {

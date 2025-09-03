@@ -5,11 +5,11 @@ import { z } from 'zod'
 
 //Usado nos Sevices
 export interface UserData {
-        name: string
-        age: number
-        cpf: string
-        email: string
-        password: string
+    name: string
+    age: number
+    cpf: string
+    email: string
+    password: string
 }
 
 //Usado nos Controllers para validar dados da requisição
@@ -21,22 +21,25 @@ export const UserSchema = z.object({
     password: z.string().regex(/^\d{6}$/, "Senha deve conter exatamente 6 dígitos")
 })
 
+//Classe Users
 export class User {
     private id: string
-    public name: string
-    public age: number
-    public cpf: string
-    public email: string
+    private name: string
+    private age: number
+    private cpf: string
+    private email: string
     private password: string
-    
+    private roles: UserRoles
 
-    constructor( userdata: UserData ) {
+
+    constructor(userdata: UserData) {
         this.id = randomUUID()
         this.name = userdata.name
         this.age = userdata.age
         this.cpf = userdata.cpf
         this.email = userdata.email
         this.password = bcrypt.hashSync(userdata.password, 10)
+        this.roles = UserRoles.operator
     }
 
     //Getters
@@ -46,20 +49,61 @@ export class User {
 
     //Setters
 
-    
     //Methods
     validate_process(db: User[]): Status {
-        return new ValidateUserService().process(this, db)
+        const result = new ValidateUserService().process(this, db)
+        this.roles = UserRoles.none
+        return result
     }
 
-    compare_pass( password: string ): boolean {
-        return bcrypt.compareSync(password, this.password)
+    public_data(): Omit<UserData, "password"> & { id: string } | null {
+        if (this.roles === UserRoles.operator || this.roles === UserRoles.admin ) {
+            this.roles = UserRoles.none
+            return {
+                id: this.id,
+                name: this.name,
+                age: this.age,
+                cpf: this.cpf,
+                email: this.email
+            }
+        }
+        return null
+    }
+
+    authenticate( password: string ): Status {
+        if (bcrypt.compareSync(password, this.password)) {
+            this.roles = UserRoles.admin
+            return Status.success
+        }
+        return Status.failed
+    }
+
+    compare_pass(password: string): Status | null {
+        if (this.roles === UserRoles.operator || this.roles === UserRoles.admin ) {
+            //this.roles = UserRoles.none
+          if (bcrypt.compareSync(password, this.password))
+            return Status.success
+          else
+            return Status.failed
+        }
+
+        return null
     }
 
     static import(json: any): User {
-        const user = Object.create(User.prototype) // cria instância sem chamar constructor
-        return Object.assign(user, json)            // copia as propriedades
+        const instance = Object.create(User.prototype)
+        const user: User = Object.assign(instance, json)
+        user.roles = UserRoles.operator
+
+        return user
     }
+}
+
+enum UserRoles {
+    creator = 'instance the user',
+    admin = 'edit_data',
+    operator = 'see_public_data',
+    none = 'none'
 }
 
 enum Status {
@@ -70,24 +114,32 @@ enum Status {
 class ValidateUserService {
     public status!: Status
 
-    process(user: User, db: User[]): Status {
-        if (db.find((u: User) => u.cpf === user.cpf)) {
+    process(newuser: User, db: any): any {
+        const user = newuser.public_data()
+
+        if (db.find((u: any) => {
+            return u.cpf === user?.cpf
+        })) {
             throw new HttpError(409, 'Este CPF já está cadastrado')
         }
-        if (db.find((u: User) => u.email === user.email)) {
+        if (db.find((u: any) => {
+            return u.email === user?.email
+        })) {
             throw new HttpError(409, 'Este email já está cadastrado')
         }
 
-        return Status.success
+        return { status: Status.success, user }
     }
 }
 
 export interface UpdateData {
     type: 'email' | 'password',
-    data: string
+    data: string,
+    password: string
 }
 
 export const UpdateDataSchema = z.object({
     type: z.enum(["email", "password"]),
     data: z.string(),
+    password: z.string()
 })

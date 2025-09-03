@@ -57,8 +57,8 @@ export class User {
     }
 
     static import(json: any): User {
-        const user = Object.create(User.prototype) // cria instância sem chamar constructor
-        return Object.assign(user, json)            // copia as propriedades
+        const user = Object.create(User.prototype)
+        return Object.assign(user, json)
     }
 }
 

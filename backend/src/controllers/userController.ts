@@ -46,8 +46,8 @@ async function selectUserById(request: FastifyRequest, reply: FastifyReply) {
 async function deleteUserById(request: FastifyRequest, reply: FastifyReply) {
     try {
         const uuid: string = uuid_schema( request.params )
-        const response = await userService.deleteUserById( uuid )
-        reply.status(200).send(response)
+        const data = await userService.deleteUserById( uuid )
+        reply.status(200).send({ status:'success', data })
 
     } catch (err: any) {
         reply.status(err.code).send({ status: 'failed', message: err.message})

@@ -16,18 +16,23 @@ async function listAccounts (request: FastifyRequest, reply: FastifyReply) {
         }
     }
 }
-/*
-async function buscarContaPeloId(request: FastifyRequest, reply: FastifyReply) {
-    try {
-        const accountUUID = uuid_schema(request.params)
-        const account = await accountService.buscarContaPeloId(accountUUID)
-        reply.status(200).send({ status: true, data: { account } })
 
+async function selectAccountById(request: FastifyRequest, reply: FastifyReply) {
+    try {
+        const uuid = uuid_schema(request.params)
+        const account = await accountService.selectAccountById( uuid )
+
+        reply.status(200).send({ status: 'success', account })
     } catch (err: any) {
-        reply.status(err.code).send({ status: false, message: err.message })
+        if (err instanceof HttpError) {
+            reply.status(err.code).send({ status: 'failed', message: err.message })
+        } else {
+            reply.status(500).send({ status: 'failed', message: err.message })
+        }
     }
 }
-*/
+
 export const accountController = {
-    listAccounts
+    listAccounts,
+    selectAccountById
 }

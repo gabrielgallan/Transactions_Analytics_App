@@ -13,7 +13,6 @@ async function createAccount(user: User, password: string) {
     database.insert('accounts', account)
 }
 
-//Ajustar
 async function listAccounts() {
     const rawAccounts: Account[] = database.select('accounts').all()
 
@@ -27,17 +26,18 @@ async function listAccounts() {
     }
 }
 
-/*//Refazer
-async function buscarContaPeloId( uuid: string ) {
-    const account: Account = database.select_where('accounts', 'id', uuid)
-    if ( account ) {
-        return account
+async function selectAccountById( uuid: string ) {
+    const rawAccount: Account = database.select('accounts').where('id', uuid).first()
+
+    if ( rawAccount ) {
+        return Account.import(rawAccount).public_data()
     } else {
-        throw { code: 404, message: 'Account not found' }
+        throw new HttpError(404, 'Conta não encontrada')
     }
-}*/
+}
 
 export const accountService = {
     createAccount,
-    listAccounts
+    listAccounts,
+    selectAccountById
 }

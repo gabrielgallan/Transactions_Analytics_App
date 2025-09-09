@@ -1,17 +1,20 @@
 import { database } from "../app.ts"
 import { Transaction, TransactionData } from "../models/Transaction.ts"
 import { accountService } from "./accountService.ts"
+import { Account } from "../models/Accounts.ts"
 
-async function criarTransacao ( account_uuid: string, data: TransactionData ): Promise<Transaction> {
+async function createTransaction ( account_uuid: string, data: TransactionData ): Promise<Transaction> {
     try {
-        const account = await accountService.buscarContaPeloId( account_uuid )
+        const rawAccount: Account = database.select('accounts').where('id', account_uuid).first()
+        const account: Account = Account.import(rawAccount)
+
         const transaction = new Transaction(account_uuid, data)
 
-        switch (data.type) {
-            case ('credit'):
+        switch (data.flow) {
+            case ('input'):
                 account.deposit(transaction)
                 break
-            case ('debit'):
+            case ('output'):
                 account.withdraw(transaction)
                 break
             default:
@@ -19,16 +22,22 @@ async function criarTransacao ( account_uuid: string, data: TransactionData ): P
         }
         
         database.insert('transactions', transaction)
+        database.update('accounts', account_uuid, account)
         return transaction
     } catch (err: any) {
         throw new Error('Erro ao processar transação: ' + err.message)
     }
 }
 
-async function listarTransacoesDaConta ( account_uuid: string ): Promise<Transaction[]> {
+async function listAccountTransactions ( uuid: string ) {
     try {
-        const transactions = database.select_where('transactions', 'account_id', account_uuid)
-        if ( transactions ) {
+        const rawTransactions: Transaction[] = database.select('transactions').where('account_id', uuid).all()
+
+        if ( rawTransactions ) {
+            const transactions = rawTransactions.map((transaction) => {
+                return Transaction.import(transaction).public_data()
+            })
+
             return transactions
         } else {
             throw new Error('Não há transações para a conta informada')
@@ -38,7 +47,7 @@ async function listarTransacoesDaConta ( account_uuid: string ): Promise<Transac
     }
 }
 
-export const transactionService = {
-    criarTransacao,
-    listarTransacoesDaConta
+export const transactionServices = {
+    createTransaction,
+    listAccountTransactions
 }

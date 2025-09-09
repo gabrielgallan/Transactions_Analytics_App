@@ -46,12 +46,12 @@ export class Account {
     }
 
     deposit(transaction: Transaction): void {
-        this.balance += transaction.getAmount
+        this.balance += transaction.public_data().amount
     }
 
     withdraw(transaction: Transaction): void {
-        if (transaction.getAmount <= this.balance) {
-            this.balance -= transaction.getAmount
+        if (transaction.public_data().amount <= this.balance) {
+            this.balance -= transaction.public_data().amount
         } else {
             throw new Error('Não há saldo suficiente para esta transação')
         }

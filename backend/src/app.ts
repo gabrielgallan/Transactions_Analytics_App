@@ -1,10 +1,12 @@
-import fastify from "fastify"
-import { Database } from "./database/database.ts"
-import { registerRoutes } from "./routes/routes.ts"
+import fastify from 'fastify'
+import { Database } from './database/database.ts'
+import { registerRoutes } from './routes/routes.ts'
 
-export const database = new Database
+export const database = new Database()
 
-export const app = fastify()
+const app = fastify()
 
-//Registrando as rotas da aplicação
+// Registrando as rotas da aplicação
 registerRoutes(app)
+
+export default app

@@ -5,6 +5,7 @@ import { HttpError } from "../models/HttpErrors.ts"
 import { UpdateUserHandler } from "../middlewares/user_handlers.ts"
 import { z } from "zod"
 import { accountService } from "./accountService.ts"
+import { transactionServices } from "./transactionsService.ts"
 
 async function createUser(userdata: UserData) {
     try {
@@ -45,6 +46,8 @@ async function deleteUserById(uuid: string) {
         const account_json: Account = database.select('accounts').where('user_id', uuid).data[0]
         const account_id: string = Account.import(account_json).public_data().id
         const removed_account : Account = await database.delete('accounts', account_id)
+
+        await transactionServices.deleteAccountTransactions(account_id)
 
         return { user: User.import(removed).public_data(), account: Account.import(removed_account).public_data() }
 

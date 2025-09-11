@@ -1,7 +1,7 @@
 import { database } from '../app.ts'
 import { Transaction, TransactionData } from '../models/Transaction.ts'
 import { Account } from '../models/Accounts.ts'
-import { HttpError } from '../middlewares/errorHandlers.ts'
+import { HttpError } from '../middlewares/ErrorHandlers.ts'
 
 async function createTransaction(
   account_uuid: string,

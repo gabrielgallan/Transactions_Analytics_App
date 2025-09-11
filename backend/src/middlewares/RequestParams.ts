@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { HttpError } from './errorHandlers.ts'
+import { HttpError } from './ErrorHandlers.ts'
 
 export function uuid_schema(param: unknown) {
   const uuidSchema = z.object({

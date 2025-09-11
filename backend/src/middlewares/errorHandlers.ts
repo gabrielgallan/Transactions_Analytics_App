@@ -1,7 +1,8 @@
 import { z } from 'zod'
 
 export function ZodErrorHandler(err: z.ZodError) {
-  return err.errors.map((e) => e.message)
+  const strings =  err.errors.map((e) => e.message)
+  return strings.join(', ')
 }
 
 export class HttpError extends Error {

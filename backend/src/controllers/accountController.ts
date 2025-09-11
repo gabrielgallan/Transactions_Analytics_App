@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify'
 import { accountService } from '../services/accountService.ts'
-import { uuid_schema } from '../middlewares/requestParamsHandlers.ts'
-import { HttpError } from '../middlewares/errorHandlers.ts'
+import { uuid_schema } from '../middlewares/RequestParams.ts'
+import { HttpError } from '../middlewares/ErrorHandlers.ts'
 import { transactionServices } from '../services/transactionsService.ts'
 import { TransactionSchema } from '../models/Transaction.ts'
 

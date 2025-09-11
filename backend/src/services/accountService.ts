@@ -1,42 +1,36 @@
 import { Account } from '../models/Accounts.ts'
-import { database } from '../app.ts'
-import { User } from '../models/User.ts'
-import { HttpError } from '../middlewares/errorHandlers.ts'
+import { ReturnUserDataToOpenAccount, UserModel } from '../models/User.ts'
+import { HttpError } from '../middlewares/ErrorHandlers.ts'
+import { accountRepository } from '../repositories/accountRepository.ts'
 
-async function createAccount(user: User, password: string) {
-  user.authenticate(password)
-  const t_pass = user.password_hash
+async function createAccount(user: UserModel, password: string) {
+  const UserData = ReturnUserDataToOpenAccount.authenticate(user, password)
 
-  user.authenticate(password)
-  const data = user.public_data()
-  const account = new Account(data?.name, data?.id, t_pass)
-  database.insert('accounts', account)
+  if (UserData !== 'unauthorized') {
+    const account = Account.create(UserData)
+    await accountRepository.insert(account)
+  } else {
+    throw new HttpError(500, 'Erro interno de autorização')
+  }
 }
 
 async function listAccounts() {
-  const rawAccounts: Account[] = database.select('accounts').all()
+  const rawAccounts: Account[] = await accountRepository.selectAll()
 
-  if (rawAccounts) {
-    const accounts = rawAccounts.map((account) => {
-      return Account.import(account).public_data()
-    })
-    return accounts
-  } else {
+  if (rawAccounts) 
+    return rawAccounts.map((account) => Account.import(account).public_data())
+  else 
     throw new HttpError(404, 'Não foi possível encontrar as contas')
-  }
+  
 }
 
 async function selectAccountById(uuid: string) {
-  const rawAccount: Account = database
-    .select('accounts')
-    .where('id', uuid)
-    .first()
+  const rawAccount: Account | null = await accountRepository.findById(uuid)
 
-  if (rawAccount) {
+  if (rawAccount)
     return Account.import(rawAccount).public_data()
-  } else {
-    throw new HttpError(404, 'Conta não encontrada')
-  }
+  else
+    throw new HttpError(404, 'Conta não encontrada')  
 }
 
 export const accountService = {

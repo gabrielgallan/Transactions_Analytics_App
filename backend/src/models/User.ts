@@ -1,10 +1,10 @@
 import { randomUUID } from 'crypto'
-import { HttpError } from '../middlewares/errorHandlers.ts'
+import { HttpError } from '../middlewares/ErrorHandlers.ts'
 import * as bcrypt from 'bcryptjs'
 import { z } from 'zod'
 
 // Usado nos Sevices
-export interface UserData {
+export interface RequestBodyUserData {
   name: string
   age: number
   cpf: string
@@ -12,16 +12,15 @@ export interface UserData {
   password: string
 }
 
-// Usado nos Controllers para validar dados da requisição
-export const UserSchema = z.object({
-  name: z.string(),
-  email: z.string().email('Email inválido'),
-  age: z.number().min(18, 'O usuário deve ser maior de idade'),
-  cpf: z.string().regex(/^\d{11}$/, 'CPF inválido'),
-  password: z
-    .string()
-    .regex(/^\d{6}$/, 'Senha deve conter exatamente 6 dígitos'),
-})
+export interface UserModel {
+  id: string
+  name: string
+  age: number
+  cpf: string
+  email: string
+  password: string
+  created_at: string
+}
 
 // Classe Users
 export class User {
@@ -31,40 +30,31 @@ export class User {
   private cpf: string
   private email: string
   private password: string
-  private roles: UserRoles
+  private created_at: string
 
-  constructor(userdata: UserData) {
+  private constructor(userdata: RequestBodyUserData) {
     this.id = randomUUID()
     this.name = userdata.name
     this.age = userdata.age
     this.cpf = userdata.cpf
     this.email = userdata.email
     this.password = bcrypt.hashSync(userdata.password, 10)
-    this.roles = UserRoles.operator
+    this.created_at = new Date().toISOString().replace('T', ' ').substring(0, 19)
   }
 
-  // Getters
-  get password_hash(): string {
-    if (this.roles === UserRoles.admin) {
-      this.roles = UserRoles.none
-      return this.password
-    } else {
-      return Status.failed
-    }
+  static create(userdata: RequestBodyUserData) {
+    return new User(userdata)
   }
 
-  // Setters
+  static import(json: any): User {
+    const instance = Object.create(User.prototype)
+    const user: User = Object.assign(instance, json)
+
+    return user
+  }
 
   // Methods
-  validate_process(db: User[]): Status {
-    const result = new ValidateUserService().process(this, db)
-    this.roles = UserRoles.admin
-    return result
-  }
-
-  public_data(): Omit<UserData, 'password'> & { id: string } {
-    if (this.roles === UserRoles.operator || this.roles === UserRoles.admin) {
-      this.roles = UserRoles.none
+  public_data(): Omit<UserModel, 'password' | 'created_at'> {
       return {
         id: this.id,
         name: this.name,
@@ -72,88 +62,39 @@ export class User {
         cpf: this.cpf,
         email: this.email,
       }
-    }
-    return {
-      id: '',
-      name: '',
-      age: 0,
-      cpf: '',
-      email: '',
-    }
   }
 
-  authenticate(password: string): Status {
+  /*authenticate(password: string): Status {
     if (bcrypt.compareSync(password, this.password)) {
       this.roles = UserRoles.admin
       return Status.success
     }
     return Status.failed
-  }
+  }*/
 
   compare_pass(password: string): Status | null {
-    if (this.roles === UserRoles.operator || this.roles === UserRoles.admin) {
-      // this.roles = UserRoles.none
       if (bcrypt.compareSync(password, this.password)) return Status.success
       else return Status.failed
-    }
-
-    return null
-  }
-
-  static import(json: any): User {
-    const instance = Object.create(User.prototype)
-    const user: User = Object.assign(instance, json)
-    user.roles = UserRoles.operator
-
-    return user
   }
 }
 
-enum UserRoles {
-  creator = 'instance user',
-  admin = 'edit data',
-  operator = 'see public data',
-  none = 'none',
+export class ReturnUserDataToOpenAccount {
+  static authenticate(rawuser: UserModel, userpass: string): Pick<UserModel, 'name' | 'id' | 'password'> | Status.unauthorized {
+    const user: User = User.import(rawuser)
+    if (user.compare_pass(userpass) === 'success') {
+      return {
+        name: rawuser.name,
+        id: rawuser.id,
+        password: rawuser.password
+      }
+    } else {
+      return Status.unauthorized
+    }
+  }
 }
 
 enum Status {
   success = 'success',
   failed = 'failed',
+  unauthorized = 'unauthorized'
 }
-
-class ValidateUserService {
-  public status!: Status
-
-  process(newuser: User, db: any): any {
-    const user = newuser.public_data()
-
-    if (
-      db.find((u: any) => {
-        return u.cpf === user?.cpf
-      })
-    ) {
-      throw new HttpError(409, 'Este CPF já está cadastrado')
-    }
-    if (
-      db.find((u: any) => {
-        return u.email === user?.email
-      })
-    ) {
-      throw new HttpError(409, 'Este email já está cadastrado')
-    }
-
-    return { status: Status.success, user }
-  }
-}
-
-export interface UpdateData {
-  type: 'email' | 'password'
-  data: string
-  password: string
-}
-
-export const UpdateDataSchema = z.object({
-  type: z.enum(['email', 'password']),
-  data: z.string(),
-  password: z.string(),
-})

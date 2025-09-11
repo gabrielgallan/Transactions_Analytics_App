@@ -1,29 +1,45 @@
 import { randomUUID } from 'crypto'
 import { Transaction } from './Transaction.ts'
+import { UserModel } from './User.ts'
 
 interface PublicAccountSchema {
   id: string
   user_id: string
   holder: string
   balance: number
-  type: string
+  type: string | null
 }
+
+type RequestUserData = Pick<UserModel, 'name' | 'id' | 'password'>
 
 export class Account {
   private id: string
   private user_id: string
   private holder: string
   private balance: number
-  private type: string
+  private type: string | null
   private transaction_password: string
+  private created_at: string
 
-  constructor(username: string, userID: string, t_password: string) {
+  private constructor( UserData: RequestUserData ) {
     this.id = randomUUID()
-    this.user_id = userID
-    this.holder = username
+    this.user_id = UserData.id
+    this.holder = UserData.name
     this.balance = 0
-    this.type = ''
-    this.transaction_password = t_password
+    this.type = null
+    this.transaction_password = UserData.password
+    this.created_at = new Date().toISOString().replace('T', ' ').substring(0, 19)
+  }
+
+  static import(json: any): Account {
+    const instance = Object.create(Account.prototype)
+    const account: Account = Object.assign(instance, json)
+
+    return account
+  }
+
+  static create( UserData: RequestUserData ): Account {
+    return new Account(UserData)
   }
 
   // Getters
@@ -54,12 +70,5 @@ export class Account {
     } else {
       throw new Error('Não há saldo suficiente para esta transação')
     }
-  }
-
-  static import(json: any): Account {
-    const instance = Object.create(Account.prototype)
-    const account: Account = Object.assign(instance, json)
-
-    return account
   }
 }

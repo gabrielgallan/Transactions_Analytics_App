@@ -1,95 +1,68 @@
-import { UserData, User, UpdateData } from '../models/User.ts'
-import { Account } from '../models/Accounts.ts'
-import { database } from '../app.ts'
-import { HttpError } from '../middlewares/errorHandlers.ts'
-import { UpdateUserHandler } from '../middlewares/userServicesHandlers.ts'
-import { z } from 'zod'
+import { RequestBodyUserData, User } from '../models/User.ts'
+import { HttpError } from '../middlewares/ErrorHandlers.ts'
 import { accountService } from './accountService.ts'
 import { transactionServices } from './transactionsService.ts'
+import { userRepository } from '../repositories/userRepository.ts'
+import { UpdateUserData } from '../middlewares/RequestBody.ts'
 
-async function createUser(userdata: UserData) {
+async function createUser(userdata: RequestBodyUserData) {
   try {
-    const user = new User(userdata)
-    const proccess = user.validate_process(database.select('users').data)
-    await accountService.createAccount(user, userdata.password)
+    const user = User.create(userdata)
+    const query = await userRepository.insert(user)
 
-    database.insert('users', user)
-    return proccess
-  } catch (err) {
-    throw err
+    return query
+  } catch (err: any) {
+    if (err instanceof HttpError) {
+      throw err
+    } else {
+      throw new HttpError(500, `Erro ao criar usuário: ${err.message}`)
+    }
   }
 }
 
 async function listUsers() {
-  const rawUsers: User[] = database.select('users').data
-  const users = rawUsers.map((user) => {
-    return User.import(user).public_data()
-  })
+  const rawUsers: User[] = await userRepository.selectAll()
 
-  return users
+  if (rawUsers)
+    return rawUsers.map((user) => User.import(user).public_data())
+  else
+    throw new HttpError(500, 'Erro ao buscar usuários')
 }
 
 async function selectUserById(uuid: string) {
-  const rawUser: User = database.select('users').where('id', uuid).data[0]
+  const rawUser: User | null = await userRepository.findById(uuid)
 
   if (rawUser) return User.import(rawUser).public_data()
   else throw new HttpError(404, 'Usuário não encontrado')
 }
 
 async function deleteUserById(uuid: string) {
-  try {
-    const removed: User = await database.delete('users', uuid)
+  const query = await userRepository.delete(uuid)
 
-    const account_json: Account = database
-      .select('accounts')
-      .where('user_id', uuid).data[0]
-    const account_id: string = Account.import(account_json).public_data().id
-    const removed_account: Account = await database.delete(
-      'accounts',
-      account_id,
-    )
-
-    await transactionServices.deleteAccountTransactions(account_id)
-
-    return {
-      user: User.import(removed).public_data(),
-      account: Account.import(removed_account).public_data(),
-    }
-
-    return { removed, account_id }
-  } catch (err: any) {
-    throw err
-  }
+  if (query) 
+    return `Usuário deletado: ${uuid}`
+  else
+    throw new HttpError(404, 'Usuário não encontrado')
 }
 
-async function updateUser(uuid: string, update: UpdateData) {
-  try {
-    const user: User = User.import(
-      database.select('users').where('id', uuid).data[0],
-    )
-    if (user.compare_pass(update.password) === 'success') {
-      const data = await UpdateUserHandler(
-        update,
-        user,
-        database.select('users').data,
-      )
+async function updateUser(uuid: string, update: UpdateUserData) {
+  const rawUser: User | null = await userRepository.findById(uuid)
 
-      const updated = {
-        ...user,
-        ...data,
+  if (rawUser) {
+    if (User.import(rawUser).compare_pass(update.auth) === 'success'){
+      try {
+        const updated = await userRepository.update(uuid, update.data)
+        return updated
+
+      } catch (err: any) {
+        if (err instanceof HttpError) throw err
+        else throw new HttpError(500, `Erro ao atualizar usuário: ${err.message}`)
       }
-
-      const service = await database.update('users', uuid, updated)
-      return User.import(service).public_data()
     } else {
-      throw new HttpError(401, 'Não autorizado, senha incorreta')
+      throw new HttpError(401, `Erro de autorização, senha inválida`)
     }
-  } catch (err: any) {
-    if (err instanceof z.ZodError) {
-      throw new HttpError(404, err.errors[0].message)
-    }
-
-    throw err
+  } else {
+    throw new HttpError(404, 'Usuário não encontrado')
   }
 }
 

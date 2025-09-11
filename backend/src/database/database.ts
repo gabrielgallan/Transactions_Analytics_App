@@ -1,5 +1,5 @@
 import fs from 'fs/promises'
-import { HttpError } from '../middlewares/errorHandlers.ts'
+import { HttpError } from '../middlewares/ErrorHandlers.ts'
 
 const databasePath = new URL('db.json', import.meta.url)
 

@@ -3,7 +3,7 @@ import { accountService } from '../services/accountService.ts'
 import { uuid_schema } from '../middlewares/RequestParams.ts'
 import { HttpError } from '../middlewares/ErrorHandlers.ts'
 import { transactionServices } from '../services/transactionsService.ts'
-import { TransactionSchema } from '../models/Transaction.ts'
+import { TransactionSchema } from "../models/Transaction.ts"
 
 async function listAccounts(request: FastifyRequest, reply: FastifyReply) {
   try {
